@@ -1,0 +1,6 @@
+{
+  "name": "BioHubCloud",
+  "description": "Biological sequence analysis portal with offline DNA-to-Protein translation, ORF finder, GC-content analysis, and a specialized Bio-AI Assistant integrated with NCBI database grounding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

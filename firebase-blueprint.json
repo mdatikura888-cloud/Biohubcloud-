@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique user ID from Firebase Authentication"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "The user's photo URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the user registered"
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "SavedSequence": {
+      "title": "SavedSequence",
+      "description": "Biological sequences analyzed and saved by users",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique sequence document ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner's Firebase Auth UID"
+        },
+        "name": {
+          "type": "string",
+          "description": "A user-defined name or label for the sequence"
+        },
+        "sequence": {
+          "type": "string",
+          "description": "The genomic sequence string"
+        },
+        "reference": {
+          "type": "string",
+          "description": "The optional reference genomic sequence string"
+        },
+        "length": {
+          "type": "integer",
+          "description": "Length of the sequence"
+        },
+        "gcContent": {
+          "type": "string",
+          "description": "GC Content percentage as a formatted string"
+        },
+        "protein": {
+          "type": "string",
+          "description": "Translated protein sequence string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this sequence was analyzed and saved"
+        }
+      },
+      "required": ["id", "userId", "name", "sequence", "length", "gcContent", "createdAt"]
+    },
+    "ChatSession": {
+      "title": "ChatSession",
+      "description": "Bio-AI Assistant chat conversation session",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique session ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The owner's Firebase Auth UID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Summarized chat title or initial question"
+        },
+        "messages": {
+          "type": "array",
+          "description": "A list of message objects in the conversation"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the chat was started"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the chat was last updated"
+        }
+      },
+      "required": ["id", "userId", "title", "messages", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/saved_sequences/{sequenceId}": {
+      "schema": "SavedSequence",
+      "description": "Biological sequences saved by users"
+    },
+    "/chat_sessions/{sessionId}": {
+      "schema": "ChatSession",
+      "description": "AI chatbot sessions"
+    }
+  }
+}

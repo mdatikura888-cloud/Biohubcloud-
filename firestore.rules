@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation Helpers
+    function isValidUser(data) {
+      return data.uid is string &&
+        data.email is string &&
+        data.email.size() <= 128;
+    }
+
+    function isValidSavedSequence(data) {
+      return data.userId is string &&
+        data.sequence is string &&
+        data.sequence.size() <= 100000 &&
+        data.name is string &&
+        data.name.size() <= 100;
+    }
+
+    function isValidChatSession(data) {
+      return data.userId is string &&
+        data.title is string &&
+        data.title.size() <= 200 &&
+        data.messages is list &&
+        data.messages.size() <= 1000;
+    }
+
+    // User profiles match block
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUser(request.resource.data) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.createdAt == request.time;
+      allow update: if isOwner(userId) &&
+        isValidUser(request.resource.data) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.email == resource.data.email &&
+        (request.resource.data.createdAt == resource.data.createdAt || request.resource.data.createdAt == request.time);
+    }
+
+    // Saved biological sequences match block
+    match /saved_sequences/{sequenceId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() &&
+        isValidId(sequenceId) &&
+        isValidSavedSequence(request.resource.data) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+        
+      allow update: if isSignedIn() &&
+        isValidSavedSequence(request.resource.data) &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.createdAt == resource.data.createdAt;
+        
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Chat sessions match block
+    match /chat_sessions/{sessionId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      allow create: if isSignedIn() &&
+        isValidId(sessionId) &&
+        isValidChatSession(request.resource.data) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+        
+      allow update: if isSignedIn() &&
+        isValidChatSession(request.resource.data) &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.updatedAt == request.time;
+        
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
